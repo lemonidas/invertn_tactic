@@ -1,24 +1,26 @@
 DECLARE PLUGIN "invertn"
 
 open Pp
-open Constrarg
+open Stdarg
 open Names
 
+open Ltac_plugin   
+
 let base_invert (hyp : Id.t) = 
-  Proofview.Goal.enter { enter = begin fun gl ->
+  Proofview.Goal.enter begin fun gl ->
       Tacticals.New.tclTHEN 
         (Inv.inv FullInversion None (NamedHyp hyp))
       (Tacticals.New.tclTHEN
         (Tactics.clear [hyp])
         (Equality.subst_all ()))
-  end }
+  end 
 
 let rec repeat n x = 
   if n = 0 then []
   else x :: repeat (n-1) x
 
 let rec do_invert (n : int) (hyp : Id.t) =
-  Proofview.Goal.enter { enter = begin fun gl ->
+  Proofview.Goal.enter begin fun gl ->
     if n = 0 then
       Tacticals.New.tclTHEN 
         (base_invert hyp)
@@ -29,7 +31,7 @@ let rec do_invert (n : int) (hyp : Id.t) =
         (Tacticals.New.tclTHENS
            (base_invert hyp)
            (repeat n Tacticals.New.tclIDTAC))
-  end }
+  end 
 
 
 TACTIC EXTEND invertn
